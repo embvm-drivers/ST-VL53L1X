@@ -1,4 +1,4 @@
-project('PROJECT_NAME',
+project('st-vl53l1x-driver',
 	['c', 'cpp'],
 	default_options : [
 		'warning_level=3',
@@ -11,7 +11,7 @@ project('PROJECT_NAME',
 		'c_std=c11', 'build.c_std=c11',
 		'cpp_std=c++17', 'build.cpp_std=c++17',
 	],
-	meson_version: '>=0.54.0',
+	meson_version: '>=0.55.0',
 	version: '0.1'
 )
 
@@ -88,11 +88,10 @@ subdir('build/objcopy')
 # Subprojects #
 ###############
 
-libmemory_subproject = subproject('libmemory')
-etl_subproject = subproject('etl')
+embvm_core_subproject = subproject('embvm-core')
 
-libmemory_freelist_dep = libmemory_subproject.get_variable('libmemory_freelist_dep')
-etl_dep = etl_subproject.get_variable('etl_dep')
+framework_include_dep = embvm_core_subproject.get_variable('framework_include_dep')
+framework_host_include_dep = embvm_core_subproject.get_variable('framework_host_include_dep')
 
 # Configure the project to include `libc` headers by default
 #######################
