@@ -4,18 +4,23 @@ vl53l1x_files = files(
 	'vl53l1x.cpp'
 )
 
-# TODO: also build a native version?
 st_vl53l1x = static_library('st_vl53l1x',
 	sources: vl53l1x_files,
 	dependencies: [
 		framework_include_dep,
 		framework_host_include_dep
-	]
+	],
+	build_by_default: meson.is_subproject() == false
 )
 
-st_vl53l1x_driver_dep = declare_dependency(
-	link_with: st_vl53l1x,
-	include_directories: include_directories('.', is_system: true),
+st_vl53l1x_native = static_library('st_vl53l1x_native',
+	sources: vl53l1x_files,
+	dependencies: [
+		framework_include_dep,
+		framework_native_include_dep
+	],
+	native: true,
+	build_by_default: meson.is_subproject() == false
 )
 
-framework_lint_files += vl53l1x_files
+clangtidy_files += vl53l1x_files

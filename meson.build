@@ -92,8 +92,8 @@ embvm_core_subproject = subproject('embvm-core')
 
 framework_include_dep = embvm_core_subproject.get_variable('framework_include_dep')
 framework_host_include_dep = embvm_core_subproject.get_variable('framework_host_include_dep')
+framework_native_include_dep = embvm_core_subproject.get_variable('framework_native_include_dep')
 
-# Configure the project to include `libc` headers by default
 #######################
 # Process Source Tree #
 #######################
@@ -109,6 +109,20 @@ subdir('test')
 # Defined after src and test so catch2_dep is fully populated
 # when creating the built-in targets
 subdir('build/test/catch2')
+
+################
+# Dependencies #
+################
+
+st_vl53l1x_driver_dep = declare_dependency(
+	link_with: st_vl53l1x,
+	include_directories: include_directories('src', is_system: true),
+)
+
+st_vl53l1x_native_driver_dep = declare_dependency(
+	link_with: st_vl53l1x_native,
+	include_directories: include_directories('src', is_system: true),
+)
 
 ###################
 # Tooling Modules #
