@@ -70,7 +70,7 @@ class vl53l1x final : public embvm::tof::sensor
 	 * @param address The i2c address of the sensor.
 	 */
 	explicit vl53l1x(embvm::i2c::master& i2c, uint8_t address = VL53L1X_DEFAULT_I2C_ADDR) noexcept
-		: embvm::tof::sensor("ST VL53L1X ToF"), i2c_(i2c), address_(address)
+		: i2c_(i2c), address_(address)
 	{
 	}
 
