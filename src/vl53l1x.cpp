@@ -268,7 +268,7 @@ void vl53l1x::reset() noexcept
 			// NOLINTNEXTLINE - We want to reuse the tx_buffer, and we know that it is not const
 			const_cast<uint8_t*>(op.tx_buffer)[0] = 1; // exit reset
 			writeReg(SOFT_RESET_REG, op.tx_buffer, sizeof(uint8_t), [&](auto op2, auto status) {
-				(void)status;
+				assert(status == embvm::i2c::status::ok);
 				destroy(op2.tx_buffer);
 				kickoffMeasurementOnceFirmwareReady();
 			});
@@ -348,7 +348,7 @@ void vl53l1x::writeReg(uint16_t reg, const uint8_t* tx_buffer, size_t tx_size,
 	t.tx_buffer = reinterpret_cast<const uint8_t*>(create(embutil::byteswap(reg)));
 
 	i2c_.transfer(t, [&](auto op, auto status) {
-		(void)status;
+		assert(status == embvm::i2c::status::ok);
 		destroy<uint16_t>(reinterpret_cast<const uint16_t*>(op.tx_buffer));
 	});
 
@@ -362,7 +362,7 @@ void vl53l1x::checkModelID() noexcept
 {
 	auto* r = create(MODEL_ID_REG);
 	readReg(r, &model_id_, sizeof(model_id_), [&](auto op, auto status) {
-		(void)status;
+		assert(status == embvm::i2c::status::ok);
 		assert(model_id_ == MODEL_ID && "Unexpected model ID found");
 		destroy<uint16_t>(reinterpret_cast<const uint16_t*>(op.tx_buffer));
 	});
@@ -374,7 +374,7 @@ void vl53l1x::readOscillatorCal() noexcept
 	readReg(r, reinterpret_cast<uint8_t*>(&osc_calibrate_val_), sizeof(osc_calibrate_val_),
 			[&](auto op, auto status) {
 				(void)op;
-				(void)status;
+				assert(status == embvm::i2c::status::ok);
 				destroy<uint16_t>(
 					reinterpret_cast<const uint16_t*>(static_cast<const void*>(op.tx_buffer)));
 			});
@@ -386,7 +386,7 @@ void vl53l1x::clearInterrupt() noexcept
 	auto* int_clear = create(VL53L1_INT_CLR);
 	writeReg(SYSTEM_INTERUPT_CLEAR, int_clear, sizeof(uint16_t), [&](auto op, auto status) {
 		(void)op;
-		(void)status;
+		assert(status == embvm::i2c::status::ok);
 		destroy<uint16_t>(
 			reinterpret_cast<const uint16_t*>(static_cast<const void*>(op.tx_buffer)));
 	});
@@ -406,7 +406,7 @@ void vl53l1x::readTrim() noexcept
 		// so that nets to an initial index of i + 1
 		readReg(r, &gsl::at(config_block_, i + 1), sizeof(uint8_t), [&](auto op, auto status) {
 			(void)op;
-			(void)status;
+			assert(status == embvm::i2c::status::ok);
 			destroy<uint16_t>(reinterpret_cast<const uint16_t*>(op.tx_buffer));
 		});
 	}
@@ -509,27 +509,27 @@ embvm::tof::mode vl53l1x::mode(embvm::tof::mode m) noexcept
 	writeReg(RANGE_CONFIG_PERIOD_PHASE_HIGH_REG, phaseHigh, sizeof(uint8_t),
 			 [&](auto op, auto status) {
 				 (void)op;
-				 (void)status;
+				 assert(status == embvm::i2c::status::ok);
 				 destroy(op.tx_buffer);
 			 });
 
 	// Dynamic
 	writeReg(WOI_SD0_REG, periodA, sizeof(uint8_t), [&](auto op, auto status) {
 		(void)op;
-		(void)status;
+		assert(status == embvm::i2c::status::ok);
 		destroy(op.tx_buffer);
 	});
 
 	writeReg(WOI_SD1_REG, periodB, sizeof(uint8_t), [&](auto op, auto status) {
 		(void)op;
-		(void)status;
+		assert(status == embvm::i2c::status::ok);
 		destroy(op.tx_buffer);
 	});
 
 	writeReg(INITIAL_PHASE_SD0_REG, phaseInit, sizeof(uint8_t), nullptr);
 	writeReg(INITIAL_PHASE_SD1_REG, phaseInit, sizeof(uint8_t), [&](auto op, auto status) {
 		(void)op;
-		(void)status;
+		assert(status == embvm::i2c::status::ok);
 		destroy(op.tx_buffer);
 	});
 
