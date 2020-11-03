@@ -226,7 +226,7 @@ class vl53l1x final : public embvm::tof::sensor
 	/// Static memory pool used for I2C transactions.
 	etl::generic_pool<sizeof(uint32_t), alignof(uint32_t), 64> i2c_pool_{};
 
-#ifdef VL53L1X_DISABLE_LOCKING
+#ifndef VL53L1X_DISABLE_LOCKING
 	std::mutex lock_{};
 #endif
 
