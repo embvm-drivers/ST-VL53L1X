@@ -8,10 +8,7 @@
 #include <etl/list.h>
 #include <etl/pool.h>
 
-// TODO: make this a configuration option that we get from the build system
-#define ENABLE_THREADING
-
-#ifdef ENABLE_THREADING
+#ifndef VL53L1X_DISABLE_LOCKING
 #include <mutex>
 #define VL53L1X_LOCK() lock_.lock()
 #define VL53L1X_UNLOCK() lock_.unlock()
@@ -229,7 +226,7 @@ class vl53l1x final : public embvm::tof::sensor
 	/// Static memory pool used for I2C transactions.
 	etl::generic_pool<sizeof(uint32_t), alignof(uint32_t), 64> i2c_pool_{};
 
-#ifdef ENABLE_THREADING
+#ifdef VL53L1X_DISABLE_LOCKING
 	std::mutex lock_{};
 #endif
 
