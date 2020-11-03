@@ -1,3 +1,6 @@
+// Copyright 2020 Embedded Artistry LLC
+// SPDX-License-Identifier: MIT
+
 #ifndef ST_V53L1X_HPP_
 #define ST_V53L1X_HPP_
 

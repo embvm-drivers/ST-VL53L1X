@@ -1,3 +1,6 @@
+// Copyright 2020 Embedded Artistry LLC
+// SPDX-License-Identifier: MIT
+
 #include "vl53l1x.hpp"
 #include "vl53l1x_registers.h"
 #include <cassert>
