@@ -116,14 +116,22 @@ subdir('build/test/catch2')
 # Dependencies #
 ################
 
+st_vl53l1x_include = include_directories('src', is_system: true)
+
 st_vl53l1x_driver_dep = declare_dependency(
 	link_with: st_vl53l1x,
-	include_directories: include_directories('src', is_system: true),
+	include_directories: st_vl53l1x_include,
 )
 
 st_vl53l1x_native_driver_dep = declare_dependency(
 	link_with: st_vl53l1x_native,
-	include_directories: include_directories('src', is_system: true),
+	include_directories: st_vl53l1x_include,
+)
+
+# Use this if you need to include the files directly in your build target for some reason.
+st_vl53l1x_files_dep = declare_dependency(
+	sources: vl53l1x_files,
+	include_directories: st_vl53l1x_include,
 )
 
 ###################
