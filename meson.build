@@ -95,6 +95,7 @@ embvm_core_subproject = subproject('embvm-core')
 framework_include_dep = embvm_core_subproject.get_variable('framework_include_dep')
 framework_host_include_dep = embvm_core_subproject.get_variable('framework_host_include_dep')
 framework_native_include_dep = embvm_core_subproject.get_variable('framework_native_include_dep')
+embvm_test_dep = embvm_core_subproject.get_variable('embvm_test_dep')
 
 #######################
 # Process Source Tree #
@@ -106,11 +107,6 @@ clangtidy_files = []
 catch2_tests_dep = []
 
 subdir('src')
-subdir('test')
-
-# Defined after src and test so catch2_dep is fully populated
-# when creating the built-in targets
-subdir('build/test/catch2')
 
 ################
 # Dependencies #
@@ -133,6 +129,21 @@ st_vl53l1x_files_dep = declare_dependency(
 	sources: vl53l1x_files,
 	include_directories: st_vl53l1x_include,
 )
+
+#####################
+# Process Test Tree #
+#####################
+
+catch2_tests_dep += [
+	st_vl53l1x_native_driver_dep,
+	embvm_test_dep
+]
+
+subdir('test')
+
+# Defined after src and test so catch2_dep is fully populated
+# when creating the built-in targets
+subdir('build/test/catch2')
 
 ###################
 # Tooling Modules #

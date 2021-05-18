@@ -1,4 +1,5 @@
 #include <catch2/catch.hpp>
+#include <vl53l1x.hpp>
 
 TEST_CASE("Sanity Check", "[test/catch2_test_case]")
 {
