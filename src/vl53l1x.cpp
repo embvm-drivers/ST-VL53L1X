@@ -93,6 +93,7 @@ constexpr uint16_t READ_OSC_CAL = embutil::byteswap<uint16_t>(VL53L1_RESULT_OSC_
 
 void vl53l1x::dataReady() noexcept
 {
+	printf("VL53L1X: Check Data Ready\n");
 	auto* reg = create(DATA_READY_REG);
 	readReg(reg, reinterpret_cast<uint8_t*>(reg), sizeof(uint8_t),
 			std::bind(&vl53l1x::dataReadyCb, this, std::placeholders::_1, std::placeholders::_2));
@@ -124,6 +125,8 @@ void vl53l1x::readData() noexcept
 {
 	auto* r = create(READ_RANGE_REG);
 	auto* out = create<uint16_t>();
+
+	printf("VL53L1X: Reading Data\n");
 
 	readReg(r, reinterpret_cast<uint8_t*>(out), sizeof(uint16_t), [&](auto op, auto status) {
 		auto range = embutil::byteswap<uint16_t>(
@@ -219,6 +222,8 @@ void vl53l1x::rangeStatus() noexcept
 	auto* r = create(READ_RANGE_STATUS_REG);
 	auto* status = create<uint8_t>();
 
+	printf("VL53L1X: Reading Range Status\n");
+
 	readReg(r, status, sizeof(uint8_t), [&](auto op, auto op_status) noexcept {
 		auto value = op.rx_buffer[0];
 
@@ -237,6 +242,8 @@ void vl53l1x::signalRate() noexcept
 {
 	auto* r = create(READ_SIGNAL_RATE_REG);
 	auto* reading = create<uint16_t>();
+
+	printf("VL53L1X: Reading Signal Rate\n");
 
 	readReg(r, reinterpret_cast<uint8_t*>(reading), sizeof(uint16_t), [&](auto op, auto status) {
 		auto rate = embutil::byteswap<uint16_t>(
@@ -265,11 +272,14 @@ void vl53l1x::reset() noexcept
 {
 	auto* reset = create<uint8_t>(UINT8_C(0)); // start reset
 
+	printf("VL53L1X: Initiating Reset\n");
+
 	writeReg(SOFT_RESET_REG, reset, sizeof(uint8_t), [&](auto op, auto op_status) {
 		if(op_status == embvm::i2c::status::ok)
 		{
 			// NOLINTNEXTLINE - We want to reuse the tx_buffer, and we know that it is not const
 			const_cast<uint8_t*>(op.tx_buffer)[0] = 1; // exit reset
+			printf("VL53L1X: Exit Reset\n");
 			writeReg(SOFT_RESET_REG, op.tx_buffer, sizeof(uint8_t), [&](auto op2, auto status) {
 				assert(status == embvm::i2c::status::ok);
 				destroy(op2.tx_buffer);
@@ -287,6 +297,8 @@ void vl53l1x::kickoffMeasurementOnceFirmwareReady() noexcept
 {
 	auto* r = create(FIRMWARE_SYSTEM_STATUS_REG);
 	auto* rx = create<uint8_t>();
+
+	printf("VL53L1X: Checking Firmware Ready\n");
 
 	readReg(r, rx, sizeof(uint8_t), [&](auto op, auto status) {
 		auto ready = op.rx_buffer[0] & 0x01;
@@ -364,6 +376,7 @@ void vl53l1x::writeReg(uint16_t reg, const uint8_t* tx_buffer, size_t tx_size,
 void vl53l1x::checkModelID() noexcept
 {
 	auto* r = create(MODEL_ID_REG);
+	printf("VL53L1X: Read Model ID\n");
 	readReg(r, &model_id_, sizeof(model_id_), [&](auto op, auto status) {
 		assert(status == embvm::i2c::status::ok);
 		assert(model_id_ == MODEL_ID && "Unexpected model ID found");
@@ -374,6 +387,7 @@ void vl53l1x::checkModelID() noexcept
 void vl53l1x::readOscillatorCal() noexcept
 {
 	auto* r = create(READ_OSC_CAL);
+	printf("VL53L1X: Read Oscillator Cal\n");
 	readReg(r, reinterpret_cast<uint8_t*>(&osc_calibrate_val_), sizeof(osc_calibrate_val_),
 			[&](auto op, auto status) {
 				(void)op;
@@ -387,6 +401,7 @@ void vl53l1x::clearInterrupt() noexcept
 {
 	// TODO: byteswap?
 	auto* int_clear = create(VL53L1_INT_CLR);
+	printf("VL53L1X: Clear Interrupt\n");
 	writeReg(SYSTEM_INTERUPT_CLEAR, int_clear, sizeof(uint16_t), [&](auto op, auto status) {
 		(void)op;
 		assert(status == embvm::i2c::status::ok);
@@ -400,6 +415,8 @@ void vl53l1x::readTrim() noexcept
 	// TODO: I hate this allocation scheme with this kind of iteration... Can we read a block?
 	// (Naive block read didn't work)
 	// Constants lifted from Sparkfun's Arduino code
+
+	printf("VL53L1X: Read Trim (Series of %d writes\n", VL53L1X_TRIM_BYTE_COUNT);
 
 	for(uint16_t i = 1; i < VL53L1X_TRIM_BYTE_COUNT; i++)
 	{
@@ -425,6 +442,8 @@ void vl53l1x::startMeasurement() noexcept
 
 	*reinterpret_cast<uint16_t*>(static_cast<void*>(&config_block_[0])) =
 		embutil::byteswap<uint16_t>(1);
+
+	printf("VL53L1X: Starting Measurement\n");
 
 	i2c_.transfer(t);
 }
@@ -485,12 +504,14 @@ embvm::tof::mode vl53l1x::mode(embvm::tof::mode m) noexcept
 	switch(m)
 	{
 		case embvm::tof::mode::medRange:
+			printf("VL53L1X: CONFIGURING RANGE MEDIUM\n");
 			*periodA = periodA_medRange;
 			*periodB = periodB_medRange;
 			*phaseHigh = phaseHigh_medRange;
 			*phaseInit = phaseInit_medRange;
 			break;
 		case embvm::tof::mode::longRange:
+			printf("VL53L1X: CONFIGURING RANGE LONG\n");
 			*periodA = periodA_longRange;
 			*periodB = periodB_longRange;
 			*phaseHigh = phaseHigh_longRange;
@@ -499,6 +520,7 @@ embvm::tof::mode vl53l1x::mode(embvm::tof::mode m) noexcept
 		case embvm::tof::mode::defaultRange:
 		case embvm::tof::mode::shortRange:
 		default:
+			printf("VL53L1X: CONFIGURING RANGE SHORT\n");
 			*periodA = periodA_shortRange;
 			*periodB = periodB_shortRange;
 			*phaseHigh = phaseHigh_shortRange;
@@ -507,8 +529,11 @@ embvm::tof::mode vl53l1x::mode(embvm::tof::mode m) noexcept
 	}
 
 	// Timing
+	printf("VL53L1X: Write Timing - Range COnfig Period A\n");
 	writeReg(RANGE_CONFIG_PERIOD_A_REG, periodA, sizeof(uint8_t), nullptr);
+	printf("VL53L1X: Write Timing - Range COnfig Period B\n");
 	writeReg(RANGE_CONFIG_PERIOD_B_REG, periodB, sizeof(uint8_t), nullptr);
+	printf("VL53L1X: Write Timing - Range COnfig Phase High\n");
 	writeReg(RANGE_CONFIG_PERIOD_PHASE_HIGH_REG, phaseHigh, sizeof(uint8_t),
 			 [&](auto op, auto status) {
 				 (void)op;
@@ -517,19 +542,24 @@ embvm::tof::mode vl53l1x::mode(embvm::tof::mode m) noexcept
 			 });
 
 	// Dynamic
+	printf("VL53L1X: Write Timing - WOI_SDO Reg\n");
 	writeReg(WOI_SD0_REG, periodA, sizeof(uint8_t), [&](auto op, auto status) {
 		(void)op;
 		assert(status == embvm::i2c::status::ok);
 		destroy(op.tx_buffer);
 	});
 
+	printf("VL53L1X: Write Timing - WOI SD1 Reg\n");
 	writeReg(WOI_SD1_REG, periodB, sizeof(uint8_t), [&](auto op, auto status) {
 		(void)op;
 		assert(status == embvm::i2c::status::ok);
 		destroy(op.tx_buffer);
 	});
 
+	printf("VL53L1X: Write Timing - Initial Phase SD0\n");
 	writeReg(INITIAL_PHASE_SD0_REG, phaseInit, sizeof(uint8_t), nullptr);
+
+	printf("VL53L1X: Write Timing - Iniital Phase SD1\n");
 	writeReg(INITIAL_PHASE_SD1_REG, phaseInit, sizeof(uint8_t), [&](auto op, auto status) {
 		(void)op;
 		assert(status == embvm::i2c::status::ok);
