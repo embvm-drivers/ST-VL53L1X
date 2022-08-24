@@ -4,7 +4,7 @@
 #include "vl53l1x.hpp"
 #include "vl53l1x_registers.h"
 #include <cassert>
-#include <gsl/gsl>
+#include <gsl/gsl-lite.hpp>
 
 // References:
 // * https://github.com/pololu/vl53l1x-arduino/blob/master/VL53L1X.cpp
